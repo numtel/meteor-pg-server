@@ -1,0 +1,4 @@
+{
+  "port": 5439,
+  "datadir": "testdb"
+}
