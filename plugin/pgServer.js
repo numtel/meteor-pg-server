@@ -9,7 +9,7 @@ var postgres;
 var cleanedUp = false;
 var serverReady = false;
 
-// With the mysql-server-xxx NPM dependency, cannot simply require files from
+// With the pg-server-xxx NPM dependency, cannot simply require files from
 //  meteor/tools directory because the Npm.require root directory has changed
 var toolDir = path.dirname(process.mainModule.filename);
 // Assume never more than 100 directories deep
@@ -67,9 +67,8 @@ Plugin.registerSourceHandler('pg.json', {
 
       // Check for any known errors
       var errors = [
-        /Can't start server\: Bind on TCP\/IP port\: Address already in use/,
-        /Can't change dir to .+ \(Errcode\: 2 - No such file or directory\)/,
-        /Fatal error\: .+/
+        /could not bind IPv4 socket: Address already in use/,
+        /FATAL: .+/
       ];
 
       for(var i = 0; i < errors.length; i++) {
@@ -99,7 +98,7 @@ Plugin.registerSourceHandler('pg.json', {
 
 // Stop Postgres server on Meteor exit
 Npm.require(path.join(relToolDir, 'cleanup.js')).onExit(
-function StopMysqlServer() {
+function StopPgServer() {
   if(cleanedUp === false && postgres) {
     // Only cleanup once!
     cleanedUp = true;
