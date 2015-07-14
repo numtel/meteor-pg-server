@@ -1,6 +1,6 @@
 Package.describe({
   name: 'numtel:pg-server',
-  version: '0.0.1',
+  version: '0.0.2',
   summary: 'Run PostgreSQL server inside your Meteor app',
   git: 'https://github.com/numtel/meteor-pg-server',
   documentation: 'README.md'
@@ -30,7 +30,7 @@ if(npmPkg === null) {
 } else {
   var depend = {};
   // platform dependent pg-server-xxx package
-  depend[npmPkg] = '9.4.1001';
+  depend[npmPkg] = '9.4.4';
 
   Package.registerBuildPlugin({
     name: 'pgServer',

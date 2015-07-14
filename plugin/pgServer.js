@@ -1,4 +1,3 @@
-var DEBUG = false;
 var POSTGRES_STARTUP_TIMEOUT = 10000;
 
 var path = Npm.require('path');
@@ -6,6 +5,7 @@ var fs = Npm.require('fs');
 var Future = Npm.require('fibers/future');
 
 var postgres;
+var outputStdErr = false;
 var cleanedUp = false;
 var serverReady = false;
 
@@ -38,6 +38,12 @@ Plugin.registerSourceHandler('pg.json', {
   var dataDir = settings.datadir || '.meteor/postgresdb';
   var dataDirPath = path.join(process.cwd(), dataDir);
 
+  if('output_stderr' in settings) {
+    // Allow debug flag in *.pg.json configuration file
+    outputStdErr = !! settings['output_stderr'];
+    delete settings['output_stderr'];
+  }
+
   if('datadir' in settings) {
     // dataDir is specified as the first argument to startServer
     delete settings.datadir;
@@ -60,7 +66,7 @@ Plugin.registerSourceHandler('pg.json', {
     function (data) {
       // Data never used as Buffer
       data = data.toString();
-      DEBUG && console.log('stderr: ', data);
+      outputStdErr && console.log('[Postgres] ', data);
 
       // No need to check more if server started already
       if(fut.isResolved()) return;

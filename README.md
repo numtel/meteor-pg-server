@@ -18,6 +18,8 @@ If a `datadir` setting is not specified, the PostgreSQL data will default to you
 
 When specifying a `datadir` setting, the path is relative to your application root.
 
+Optionally, set a boolean value for the `output_stderr` key to `true` in order to display full ouput of `STDERR` from the PostgreSQL server process.
+
 See [`test.pg.json`](test.pg.json) for an example. Settings are used to build the `postgres.conf` file. Specifying a port is recommended.
 
 ## Usage

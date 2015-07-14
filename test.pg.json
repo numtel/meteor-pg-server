@@ -1,4 +1,5 @@
 {
   "port": 5439,
-  "datadir": "testdb"
+  "datadir": "testdb",
+  "output_stderr": true
 }
