@@ -3,6 +3,7 @@ var POSTGRES_STARTUP_TIMEOUT = 10000;
 var path = Npm.require('path');
 var fs = Npm.require('fs');
 var Future = Npm.require('fibers/future');
+var pg = Npm.require('pg');
 
 var postgres;
 var outputStdErr = false;
@@ -19,6 +20,7 @@ var relToolDir = path.join(rootRelPath, toolDir);
 
 // For bindEnvironment()
 var fiberHelpers = Npm.require(path.join(relToolDir, 'fiber-helpers.js'));
+var MBE = fiberHelpers.bindEnvironment;
 
 var npmPkg = determinePlatformNpmPackage();
 // Should not happen as package.js should have filtered already
@@ -34,8 +36,14 @@ Plugin.registerSourceHandler('pg.json', {
   var settings =
     loadJSONContent(compileStep, compileStep.read().toString('utf8'));
 
+  if(settings.initialize) {
+    var initQueries =
+      fs.readFileSync(path.join(process.cwd(), settings.initialize)).toString();
+    delete settings.initialize;
+  }
+
   // Paths inside the application directory where database is to be stored
-  var dataDir = settings.datadir || '.meteor/postgresdb';
+  var dataDir = settings.datadir || '.meteor/local/postgresdb';
   var dataDirPath = path.join(process.cwd(), dataDir);
 
   if('output_stderr' in settings) {
@@ -49,21 +57,28 @@ Plugin.registerSourceHandler('pg.json', {
     delete settings.datadir;
   }
 
+  // Determine if data directory is going to be created
+  // This is handled by the dependent NPM package inside startServer
+  try {
+    var dataDirStat = fs.statSync(dataDir)
+  } catch(err) {
+    initializeServer = true;
+  }
+
   // Start server, but only once, wait for it to be ready (or not)
   if(!postgres) {
     var fut = new Future;
     postgres = startServer(dataDirPath, settings);
 
     // After preset timeout, give up waiting for MySQL to start or fail
-    setTimeout(fiberHelpers.bindEnvironment(function() {
+    setTimeout(MBE(function() {
       if(!fut.isResolved()) {
         console.log('[ERROR] PostgreSQL startup timeout!             ');
         fut['return']();
       }
     }), POSTGRES_STARTUP_TIMEOUT);
 
-    postgres.stderr.on('data', fiberHelpers.bindEnvironment(
-    function (data) {
+    postgres.stderr.on('data', MBE(function (data) {
       // Data never used as Buffer
       data = data.toString();
       outputStdErr && console.log('[Postgres] ', data);
@@ -93,7 +108,27 @@ Plugin.registerSourceHandler('pg.json', {
         serverReady = true;
         // Extra spaces for covering Meteor's status messages
         console.log('=> Started PostgreSQL.                        ');
-        fut['return']();
+
+        if(initializeServer && initQueries) {
+          // Perform initialization queries on new server installation
+          var connectionStr = 'postgres://'
+            + process.env.USER + ':' // Default user is same as system user
+            + 'numtel'               // From defaultpw file in NPM package
+            + '@localhost:' + (settings.port || 5432)
+            + '/postgres';           // Default database
+
+          pg.connect(connectionStr, MBE(function(error, client, pgDone) {
+            if(error) return fut['throw'](error);
+            console.log('[Postgres] Performing initialization queries...  ');
+            client.query(initQueries, MBE(function(error, result) {
+              pgDone();
+              if(error) return fut['throw'](error);
+              return fut['return']();
+            }));
+          }));
+        } else {
+          fut['return']();
+        }
       }
     }));
 

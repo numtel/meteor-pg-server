@@ -12,13 +12,21 @@ Add this package to your application to embed a PostgreSQL server:
 meteor add numtel:pg-server
 ```
 
+### Configuring the server
+
 A settings file must be created with the extension of `.pg.json` in your application. A file name like `myapp.pg.json` is valid.
 
-If a `datadir` setting is not specified, the PostgreSQL data will default to your application's `.meteor/postgresdb` directory. The directory will be created if it does not exist.
+If a `datadir` setting is not specified, the PostgreSQL data will default to your application's `.meteor/local/postgresdb` directory. The directory will be created if it does not exist.
 
 When specifying a `datadir` setting, the path is relative to your application root.
 
 Optionally, set a boolean value for the `output_stderr` key to `true` in order to display full ouput of `STDERR` from the PostgreSQL server process.
+
+#### Initialization queries
+
+In your `.pg.json` file, you may specify a filename containing queries to perform on first installation of the database under the `initialize` key. These queries will be executed if the data directory is created when the Meteor application is started.
+
+#### Example configuration
 
 See [`test.pg.json`](test.pg.json) for an example. Settings are used to build the `postgres.conf` file. Specifying a port is recommended.
 

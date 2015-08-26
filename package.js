@@ -1,6 +1,6 @@
 Package.describe({
   name: 'numtel:pg-server',
-  version: '0.0.2',
+  version: '0.1.0',
   summary: 'Run PostgreSQL server inside your Meteor app',
   git: 'https://github.com/numtel/meteor-pg-server',
   documentation: 'README.md'
@@ -28,7 +28,10 @@ if(npmPkg === null) {
   console.error('ERROR: Platform is not supported by numtel:pg-server!');
   console.error('       Supports only Linux (32 and 64 bit) and OSX (64 bit)');
 } else {
-  var depend = {};
+  var depend = {
+    // For initialization queries
+    'pg': '4.4.1'
+  };
   // platform dependent pg-server-xxx package
   depend[npmPkg] = '9.4.4';
 

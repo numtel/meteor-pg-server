@@ -19,3 +19,15 @@ Tinytest.addAsync(PREFIX + 'Simple Query', function (test, testDone) {
       }));
   }));
 });
+
+Tinytest.addAsync(PREFIX + 'Initialization Queries', function (test, testDone) {
+  pg.connect(CONN_STR, Meteor.bindEnvironment(function(error, client, pgDone) {
+    if(error) throw error;
+    client.query('SELECT * FROM test_table', Meteor.bindEnvironment(
+      function(error, result) {
+        test.equal(result.rows[0].col, 25);
+        pgDone();
+        testDone();
+      }));
+  }));
+});
