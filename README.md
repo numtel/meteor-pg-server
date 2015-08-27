@@ -2,6 +2,8 @@
 
 Package to run PostgreSQL server inside your Meteor app
 
+> **Version 1.0.0 breaking change:** Default data directory has now changed. If you do not specify a data directory in your `.pg.json` file, you will need to now specify the old default data directory in order to migrate successfully without losing your current databases (or move your data directory to the new default location, see "Configuring the server" section below). Set the `datadir` key to `.meteor/postgresdb` to maintain the old default data directory.
+
 ## Installation
 
 > Currently only supports Linux (32 and 64 bit) and Mac OSX (64 bit). Windows support is expected in the near future.

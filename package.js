@@ -1,6 +1,6 @@
 Package.describe({
   name: 'numtel:pg-server',
-  version: '0.1.0',
+  version: '1.0.0',
   summary: 'Run PostgreSQL server inside your Meteor app',
   git: 'https://github.com/numtel/meteor-pg-server',
   documentation: 'README.md'
